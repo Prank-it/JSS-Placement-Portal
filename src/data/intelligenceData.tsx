@@ -1,0 +1,363 @@
+// src/data/intelligenceData.tsx
+import {
+  Building2,
+  Globe2,
+  Users2,
+  Wallet,
+  MapPin,
+  Package,
+  Code2,
+  Handshake,
+  Swords,
+  TrendingUp,
+  Leaf,
+  Heart,
+  Newspaper,
+  BarChart3,
+  ShieldAlert,
+  Navigation,
+  Shield,
+  GraduationCap,
+  Star,
+  Gift,
+  Monitor,
+  Phone,
+} from "lucide-react";
+import type { CompanyProfile } from "@/lib/companyData";
+
+export interface IntelligenceField {
+  label: string;
+  value: string | string[];
+  type?: "text" | "url" | "video" | "rating" | "list" | "paragraph";
+}
+
+export interface IntelligenceSection {
+  id: string;
+  title: string;
+  icon: React.ReactNode;
+  fields: IntelligenceField[];
+}
+
+export function buildIntelligenceSections(
+  profile?: CompanyProfile
+): IntelligenceSection[] {
+  const p = profile;
+
+  return [
+    {
+      id: "identity",
+      title: "Company Identity",
+      icon: <Building2 className="w-4 h-4" />,
+      fields: [
+        { label: "Legal Name", value: p?.name ?? "" },
+        { label: "Short Name", value: p?.short_name ?? "" },
+        { label: "Category", value: p?.category ?? "" },
+        {
+          label: "Incorporation Year",
+          value: p?.incorporation_year ? String(p.incorporation_year) : "",
+        },
+        { label: "Nature of Company", value: p?.nature_of_company ?? "" },
+        { label: "Employee Size", value: p?.employee_size ?? "" },
+        { label: "Headquarters", value: p?.headquarters_address ?? "" },
+        { label: "Office Count", value: p?.office_count ?? "" },
+      ],
+    },
+    {
+      id: "overview",
+      title: "Overview & Vision",
+      icon: <Globe2 className="w-4 h-4" />,
+      fields: [
+        { label: "Overview", value: p?.overview_text ?? "", type: "paragraph" },
+        { label: "Vision Statement", value: p?.vision_statement ?? "", type: "paragraph" },
+        { label: "Mission Statement", value: p?.mission_statement ?? "", type: "paragraph" },
+        { label: "Core Values", value: p?.core_values ?? [], type: "list" },
+        { label: "History Highlights", value: p?.history_timeline ?? [], type: "list" },
+      ],
+    },
+    {
+      id: "leadership",
+      title: "Leadership",
+      icon: <Users2 className="w-4 h-4" />,
+      fields: [
+        { label: "CEO", value: p?.ceo_name ?? "" },
+        { label: "CEO LinkedIn", value: p?.ceo_linkedin_url ?? "", type: "url" },
+        { label: "Key Leaders", value: p?.key_leaders ?? [], type: "list" },
+        { label: "Board Members", value: p?.board_members ?? [], type: "list" },
+        { label: "Decision Maker Access", value: p?.decision_maker_access ?? "" },
+        { label: "Warm Intro Pathways", value: p?.warm_intro_pathways ?? [], type: "list" },
+      ],
+    },
+    {
+      id: "financials",
+      title: "Funding & Financials",
+      icon: <Wallet className="w-4 h-4" />,
+      fields: [
+        { label: "Annual Revenue", value: p?.annual_revenue ?? "" },
+        { label: "Annual Profit", value: p?.annual_profit ?? "" },
+        { label: "Valuation", value: p?.valuation ?? "" },
+        { label: "Revenue Mix", value: p?.revenue_mix ?? "" },
+        { label: "YoY Growth Rate", value: p?.yoy_growth_rate ?? "" },
+        { label: "Profitability Status", value: p?.profitability_status ?? "" },
+        { label: "Key Investors", value: p?.key_investors ?? [], type: "list" },
+        { label: "Recent Funding", value: p?.recent_funding_rounds ?? "" },
+        { label: "Total Capital Raised", value: p?.total_capital_raised ?? "" },
+      ],
+    },
+    {
+      id: "presence",
+      title: "Global Presence",
+      icon: <MapPin className="w-4 h-4" />,
+      fields: [
+        { label: "Operating Countries", value: p?.operating_countries ?? [], type: "list" },
+        { label: "Office Locations", value: p?.office_locations ?? [], type: "list" },
+      ],
+    },
+    {
+      id: "products",
+      title: "Products & Services",
+      icon: <Package className="w-4 h-4" />,
+      fields: [
+        { label: "Offerings", value: p?.offerings_description ?? [], type: "list" },
+        { label: "Focus Sectors", value: p?.focus_sectors ?? [], type: "list" },
+        { label: "Pain Points Addressed", value: p?.pain_points_addressed ?? [], type: "list" },
+        { label: "Top Customers", value: p?.top_customers ?? [], type: "list" },
+        { label: "Product Pipeline", value: p?.product_pipeline ?? [], type: "list" },
+        { label: "TAM", value: p?.tam ?? "" },
+        { label: "SAM", value: p?.sam ?? "" },
+        { label: "SOM", value: p?.som ?? "" },
+      ],
+    },
+    {
+      id: "tech",
+      title: "Technology Stack",
+      icon: <Code2 className="w-4 h-4" />,
+      fields: [
+        { label: "Tech Stack", value: p?.tech_stack ?? [], type: "list" },
+        { label: "Technology Partners", value: p?.technology_partners ?? [], type: "list" },
+        { label: "R&D Investment", value: p?.r_and_d_investment ?? "" },
+        { label: "AI/ML Adoption", value: p?.ai_ml_adoption_level ?? "" },
+        { label: "Cybersecurity Posture", value: p?.cybersecurity_posture ?? [], type: "list" },
+        { label: "Intellectual Property", value: p?.intellectual_property ?? [], type: "list" },
+        { label: "Tech Adoption Rating", value: p?.tech_adoption_rating ?? "" },
+      ],
+    },
+    {
+      id: "partnerships",
+      title: "Partnerships & Ecosystem",
+      icon: <Handshake className="w-4 h-4" />,
+      fields: [
+        { label: "Partnership Ecosystem", value: p?.partnership_ecosystem ?? [], type: "list" },
+        { label: "Industry Associations", value: p?.industry_associations ?? [], type: "list" },
+        { label: "Event Participation", value: p?.event_participation ?? [], type: "list" },
+        { label: "Go-to-Market Strategy", value: p?.go_to_market_strategy ?? [], type: "list" },
+      ],
+    },
+    {
+      id: "competitive",
+      title: "Competitive Landscape",
+      icon: <Swords className="w-4 h-4" />,
+      fields: [
+        { label: "Key Competitors", value: p?.key_competitors ?? [], type: "list" },
+        { label: "Market Share", value: p?.market_share_percentage ?? "" },
+        { label: "Competitive Advantages", value: p?.competitive_advantages ?? [], type: "list" },
+        { label: "Weaknesses & Gaps", value: p?.weaknesses_gaps ?? [], type: "list" },
+        { label: "Benchmark vs Peers", value: p?.benchmark_vs_peers ?? [], type: "list" },
+        { label: "Key Challenges", value: p?.key_challenges_needs ?? [], type: "list" },
+      ],
+    },
+    {
+      id: "market",
+      title: "Market Opportunity",
+      icon: <TrendingUp className="w-4 h-4" />,
+      fields: [
+        { label: "Future Projections", value: p?.future_projections ?? "" },
+        { label: "Strategic Priorities", value: p?.strategic_priorities ?? [], type: "list" },
+        { label: "Innovation Roadmap", value: p?.innovation_roadmap ?? [], type: "list" },
+        { label: "Sales Motion", value: p?.sales_motion ?? "" },
+        { label: "Customer Concentration Risk", value: p?.customer_concentration_risk ?? "" },
+      ],
+    },
+    {
+      id: "value",
+      title: "Core Value Proposition & ESG",
+      icon: <Leaf className="w-4 h-4" />,
+      fields: [
+        { label: "Core Value Proposition", value: p?.core_value_proposition ?? [], type: "list" },
+        { label: "Unique Differentiators", value: p?.unique_differentiators ?? [], type: "list" },
+        { label: "ESG Ratings", value: p?.esg_ratings ?? [], type: "list" },
+        { label: "Carbon Footprint", value: p?.carbon_footprint ?? "" },
+        { label: "Ethical Sourcing", value: p?.ethical_sourcing ?? "" },
+        { label: "Sustainability & CSR", value: p?.sustainability_csr ?? "" },
+      ],
+    },
+    {
+      id: "culture",
+      title: "Culture & Work Life",
+      icon: <Heart className="w-4 h-4" />,
+      fields: [
+        { label: "Work Culture", value: p?.work_culture_summary ?? [], type: "list" },
+        { label: "Manager Quality", value: p?.manager_quality ?? "" },
+        { label: "Psychological Safety", value: p?.psychological_safety ?? "" },
+        { label: "Feedback Culture", value: p?.feedback_culture ?? "" },
+        { label: "Diversity & Inclusion", value: p?.diversity_inclusion_score ?? "" },
+        { label: "Diversity Metrics", value: p?.diversity_metrics ?? "" },
+        { label: "Ethical Standards", value: p?.ethical_standards ?? "" },
+        { label: "Burnout Risk", value: p?.burnout_risk ?? "" },
+        { label: "Mission Clarity", value: p?.mission_clarity ?? "" },
+        { label: "Crisis Behavior", value: p?.crisis_behavior ?? "" },
+      ],
+    },
+    {
+      id: "news",
+      title: "Recent News & Milestones",
+      icon: <Newspaper className="w-4 h-4" />,
+      fields: [
+        { label: "Recent News", value: p?.recent_news ?? [], type: "list" },
+        { label: "Case Studies", value: p?.case_studies ?? [], type: "list" },
+        { label: "Awards & Recognitions", value: p?.awards_recognitions ?? [], type: "list" },
+        { label: "Customer Testimonials", value: p?.customer_testimonials ?? [], type: "list" },
+      ],
+    },
+    {
+      id: "sales",
+      title: "Sales & Customer Metrics",
+      icon: <BarChart3 className="w-4 h-4" />,
+      fields: [
+        { label: "Customer Acquisition Cost", value: p?.customer_acquisition_cost ?? "" },
+        { label: "Customer Lifetime Value", value: p?.customer_lifetime_value ?? "" },
+        { label: "CAC:LTV Ratio", value: p?.cac_ltv_ratio ?? "" },
+        { label: "Churn Rate", value: p?.churn_rate ?? "" },
+        { label: "Net Promoter Score", value: p?.net_promoter_score ?? "" },
+        { label: "Burn Rate", value: p?.burn_rate ?? "" },
+        { label: "Runway Months", value: p?.runway_months ?? "" },
+        { label: "Burn Multiplier", value: p?.burn_multiplier ?? "" },
+        { label: "Hiring Velocity", value: p?.hiring_velocity ?? "" },
+        { label: "Employee Turnover", value: p?.employee_turnover ?? "" },
+        { label: "Avg Retention Tenure", value: p?.avg_retention_tenure ?? "" },
+      ],
+    },
+    {
+      id: "risk",
+      title: "Risk & Compliance",
+      icon: <ShieldAlert className="w-4 h-4" />,
+      fields: [
+        { label: "Regulatory Status", value: p?.regulatory_status ?? [], type: "list" },
+        { label: "Legal Issues", value: p?.legal_issues ?? "" },
+        { label: "Supply Chain Dependencies", value: p?.supply_chain_dependencies ?? [], type: "list" },
+        { label: "Geopolitical Risks", value: p?.geopolitical_risks ?? [], type: "list" },
+        { label: "Macro Risks", value: p?.macro_risks ?? [], type: "list" },
+        { label: "Exit Strategy History", value: p?.exit_strategy_history ?? "" },
+      ],
+    },
+    {
+      id: "location",
+      title: "Work Location & Commute",
+      icon: <Navigation className="w-4 h-4" />,
+      fields: [
+        { label: "Remote Policy", value: p?.remote_policy_details ?? "" },
+        { label: "Flexibility Level", value: p?.flexibility_level ?? "" },
+        { label: "Typical Hours", value: p?.typical_hours ?? "" },
+        { label: "Overtime Expectations", value: p?.overtime_expectations ?? "" },
+        { label: "Weekend Work", value: p?.weekend_work ?? "" },
+        { label: "Location Centrality", value: p?.location_centrality ?? "" },
+        { label: "Public Transport", value: p?.public_transport_access ?? [], type: "list" },
+        { label: "Cab Policy", value: p?.cab_policy ?? "" },
+        { label: "Airport Commute Time", value: p?.airport_commute_time ?? "" },
+        { label: "Office Zone Type", value: p?.office_zone_type ?? "" },
+      ],
+    },
+    {
+      id: "safety",
+      title: "Safety & Wellbeing",
+      icon: <Shield className="w-4 h-4" />,
+      fields: [
+        { label: "Area Safety", value: p?.area_safety ?? "" },
+        { label: "Safety Policies", value: p?.safety_policies ?? [], type: "list" },
+        { label: "Infrastructure Safety", value: p?.infrastructure_safety ?? "" },
+        { label: "Emergency Preparedness", value: p?.emergency_preparedness ?? "" },
+        { label: "Health Support", value: p?.health_support ?? "" },
+        { label: "Family Health Insurance", value: p?.family_health_insurance ?? "" },
+        { label: "Leave Policy", value: p?.leave_policy ?? "" },
+      ],
+    },
+    {
+      id: "career",
+      title: "Career Growth & Learning",
+      icon: <GraduationCap className="w-4 h-4" />,
+      fields: [
+        { label: "Training Spend", value: p?.training_spend ?? "" },
+        { label: "Onboarding Quality", value: p?.onboarding_quality ?? "" },
+        { label: "Learning Culture", value: p?.learning_culture ?? "" },
+        { label: "Mentorship Availability", value: p?.mentorship_availability ?? "" },
+        { label: "Internal Mobility", value: p?.internal_mobility ?? "" },
+        { label: "Promotion Clarity", value: p?.promotion_clarity ?? "" },
+        { label: "Role Clarity", value: p?.role_clarity ?? "" },
+        { label: "Early Ownership", value: p?.early_ownership ?? "" },
+        { label: "Exposure Quality", value: p?.exposure_quality ?? "" },
+        { label: "Cross-Functional Exposure", value: p?.cross_functional_exposure ?? [], type: "list" },
+        { label: "Global Exposure", value: p?.global_exposure ?? "" },
+        { label: "Exit Opportunities", value: p?.exit_opportunities ?? [], type: "list" },
+        { label: "Skill Relevance", value: p?.skill_relevance ?? "" },
+        { label: "External Recognition", value: p?.external_recognition ?? "" },
+        { label: "Network Strength", value: p?.network_strength ?? "" },
+      ],
+    },
+    {
+      id: "brand",
+      title: "Brand & Reputation",
+      icon: <Star className="w-4 h-4" />,
+      fields: [
+        { label: "Brand Value", value: p?.brand_value ?? "" },
+        { label: "Client Quality", value: p?.client_quality ?? "" },
+        { label: "Company Maturity", value: p?.company_maturity ?? "" },
+        { label: "Brand Sentiment", value: p?.brand_sentiment_score ?? "" },
+        { label: "Website Quality", value: p?.website_quality ?? "" },
+        { label: "Website Traffic Rank", value: p?.website_traffic_rank ?? "" },
+      ],
+    },
+    {
+      id: "compensation",
+      title: "Compensation & Benefits",
+      icon: <Gift className="w-4 h-4" />,
+      fields: [
+        { label: "Fixed vs Variable Pay", value: p?.fixed_vs_variable_pay ?? "" },
+        { label: "Bonus Predictability", value: p?.bonus_predictability ?? "" },
+        { label: "ESOPs & Incentives", value: p?.esops_incentives ?? "" },
+        { label: "Relocation Support", value: p?.relocation_support ?? "" },
+        { label: "Lifestyle Benefits", value: p?.lifestyle_benefits ?? [], type: "list" },
+        { label: "Layoff History", value: p?.layoff_history ?? "" },
+      ],
+    },
+    {
+      id: "digital",
+      title: "Digital Presence & Ratings",
+      icon: <Monitor className="w-4 h-4" />,
+      fields: [
+        { label: "Website", value: p?.website_url ?? "", type: "url" },
+        { label: "LinkedIn", value: p?.linkedin_url ?? "", type: "url" },
+        { label: "Twitter", value: p?.twitter_handle ?? "" },
+        { label: "Facebook", value: p?.facebook_url ?? "", type: "url" },
+        { label: "Instagram", value: p?.instagram_url ?? "", type: "url" },
+        { label: "Marketing Video", value: p?.marketing_video_url ?? "", type: "video" },
+        { label: "Social Media Followers", value: p?.social_media_followers ?? "" },
+        { label: "Glassdoor Rating", value: p?.glassdoor_rating ?? "", type: "rating" },
+        { label: "Indeed Rating", value: p?.indeed_rating ?? "", type: "rating" },
+        { label: "Google Rating", value: p?.google_rating ?? "", type: "rating" },
+        { label: "Website Rating", value: p?.website_rating ?? "", type: "rating" },
+      ],
+    },
+    {
+      id: "contact",
+      title: "Contact Information",
+      icon: <Phone className="w-4 h-4" />,
+      fields: [
+        { label: "Contact Person", value: p?.contact_person_name ?? "" },
+        { label: "Title", value: p?.contact_person_title ?? "" },
+        { label: "Email", value: p?.contact_person_email ?? "" },
+        { label: "Phone", value: p?.contact_person_phone ?? "" },
+        { label: "Primary Contact Email", value: p?.primary_contact_email ?? "" },
+        { label: "Primary Phone", value: p?.primary_phone_number ?? "" },
+      ],
+    },
+  ];
+}
