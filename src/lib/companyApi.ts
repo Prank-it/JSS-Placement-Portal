@@ -88,7 +88,8 @@ export function useCompanies() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("company_json")
-        .select("company_id, short_json");
+        .select("company_id, short_json")
+        .order("company_id", { ascending: true });
 
       if (error) throw new Error(error.message);
       if (!data) return [];
@@ -105,10 +106,10 @@ export function useCompanies() {
 // SELECT company_id, short_json, full_json
 // FROM company_json
 // WHERE company_id = :id
-// Returns CompanyProfile — identical shape to what CompanyIntelligence renders.
+// Returns CompanyProfile | null — identical shape to what CompanyIntelligence renders.
 
 export function useCompanyProfile(id: number | null) {
-  return useQuery<CompanyProfile, Error>({
+  return useQuery<CompanyProfile | null, Error>({
     queryKey: companyKeys.profile(id ?? 0),
     enabled: id !== null && id > 0,
     queryFn: async () => {
@@ -116,10 +117,10 @@ export function useCompanyProfile(id: number | null) {
         .from("company_json")
         .select("company_id, short_json, full_json")
         .eq("company_id", id!)
-        .single();
+        .maybeSingle();
 
       if (error) throw new Error(error.message);
-      if (!data) throw new Error(`Company ${id} not found in company_json`);
+      if (!data) return null;
 
       const row = data as CompanyJsonRow;
       return normalizeCompanyProfile(

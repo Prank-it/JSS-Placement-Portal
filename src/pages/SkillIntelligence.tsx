@@ -373,7 +373,7 @@ export default function SkillIntelligence() {
         )}
 
         {/* ── Skill cards ── */}
-        {!isLoading && !isError && (
+        {!isLoading && !isError && skills.length > 0 && (
           <div>
             <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
               Required Skills ({skills.length})
@@ -383,6 +383,25 @@ export default function SkillIntelligence() {
                 <SkillCard key={skill.skill_set_id} skill={skill} rank={i + 1} />
               ))}
             </div>
+          </div>
+        )}
+
+        {/* ── Empty skills state ── */}
+        {!isLoading && !isError && skills.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Lock className="w-10 h-10 text-muted-foreground/40 mb-3" />
+            <h3 className="font-heading font-semibold text-base text-foreground mb-1">
+              No Benchmark Skills Found
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-sm mb-4">
+              Skill requirements and learning roadmaps have not been published for this company yet.
+            </p>
+            <button
+              onClick={() => navigate("/company/intelligence")}
+              className="inline-flex items-center gap-2 rounded-md bg-[#2563EB] text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              View Company Intelligence
+            </button>
           </div>
         )}
       </div>

@@ -1,6 +1,5 @@
-// src/components/layout/AppLayout.tsx
 import { useState } from "react";
-import { Outlet, useNavigate, NavLink } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Menu, ChevronRight, Home } from "lucide-react";
 import { AppSidebar } from "./AppSidebar";
 import { useCompany } from "@/contexts/CompanyContext";
@@ -10,6 +9,9 @@ export function AppLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { selected } = useCompany();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isSkillsPage = location.pathname.includes("/skills");
 
   return (
     <div className="flex h-screen bg-[#FFFFFF] overflow-hidden">
@@ -67,14 +69,9 @@ export function AppLayout() {
             )}
 
             <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
-            <NavLink
-              to="/company/intelligence"
-              className={({ isActive }) =>
-                `${isActive ? "text-[#2563EB] font-medium" : "hover:text-foreground"} transition-colors hidden sm:inline`
-              }
-            >
-              Intelligence
-            </NavLink>
+            <span className="text-[#2563EB] font-medium hidden sm:inline">
+              {isSkillsPage ? "Skill Intelligence" : "Company Intelligence"}
+            </span>
           </nav>
         </header>
 

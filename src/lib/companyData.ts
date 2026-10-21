@@ -266,19 +266,177 @@ export function scoreToCriticality(
   return "Baseline";
 }
 
+// ---- Placement Category Classification ----
+
+export type PlacementCategory = "Super Dream" | "Dream" | "Standard" | "Regular";
+
+export const CANONICAL_CATEGORIES: PlacementCategory[] = [
+  "Super Dream",
+  "Dream",
+  "Standard",
+  "Regular",
+];
+export const PLACEMENT_CATEGORIES = CANONICAL_CATEGORIES;
+
+/**
+ * Normalizes input strings (handling case, hyphens, whitespace, and tier aliases)
+ * into a canonical PlacementCategory.
+ */
+export function normalizePlacementCategory(input: unknown): PlacementCategory | null {
+  if (!input) return null;
+  const s = String(input)
+    .trim()
+    .toLowerCase()
+    .replace(/[-_]/g, " ")
+    .replace(/\s+/g, " ");
+
+  if (
+    s.includes("super dream") ||
+    s === "superdream" ||
+    s.includes("tier 1") ||
+    s === "tier1"
+  ) {
+    return "Super Dream";
+  }
+  if (
+    s.includes("dream") ||
+    s.includes("tier 2") ||
+    s === "tier2"
+  ) {
+    return "Dream";
+  }
+  if (
+    s.includes("standard") ||
+    s.includes("tier 3") ||
+    s === "tier3"
+  ) {
+    return "Standard";
+  }
+  if (
+    s.includes("regular") ||
+    s.includes("mass") ||
+    s.includes("tier 4") ||
+    s === "tier4"
+  ) {
+    return "Regular";
+  }
+  return null;
+}
+
+const REGULAR_COMPANIES = [
+  "tata consultancy services", "tcs", "infosys", "wipro", "cognizant",
+  "capgemini", "tech mahindra", "hcl technologies", "hcl",
+  "larsen & toubro infotech", "lti", "ltimindtree", "ntt data",
+  "dxc technology", "concentrix", "3i infotech", "virtusa"
+];
+
+const SUPER_DREAM_COMPANIES = [
+  "google", "alphabet", "apple", "microsoft", "amazon", "nvidia",
+  "snowflake", "palantir", "cisco", "atlassian", "uber", "adobe",
+  "openai", "deepmind", "space exploration technologies", "spacex",
+  "morgan stanley", "jpmorgan", "j.p. morgan", "goldman sachs",
+  "citigroup", "citi", "barclays", "wells fargo", "the bank of new york mellon",
+  "bny mellon", "cme group", "servicenow", "walmart"
+];
+
+const DREAM_COMPANIES = [
+  "accenture", "oracle", "sap labs", "sap", "international business machines",
+  "ibm", "dell technologies", "dell", "hp inc", "hewlett packard",
+  "volvo group", "airbus", "robert bosch", "bosch", "amadeus",
+  "guidewire", "freshworks", "fractal analytics", "zs associates",
+  "bain capability", "bain", "optum", "paypal", "fidelity investments",
+  "fidelity", "groww", "juspay", "swiggy", "flipkart", "zerodha",
+  "nutanix", "schneider electric", "commonwealth bank", "mitsubishi ufj",
+  "nielseniq", "autodesk", "electronic arts", "warner bros", "philips",
+  "cleartrip", "bigbasket", "ather energy", "seagate", "akamai"
+];
+
+/**
+ * Canonically classifies a company into a PlacementCategory based on
+ * industry standards for campus placement intelligence (e.g. JSS / Tier-1 colleges).
+ */
+export function classifyPlacementCategory(
+  name: string,
+  category: string,
+  shortName?: string
+): PlacementCategory {
+  const n = (name + " " + (shortName ?? "")).toLowerCase();
+  const c = category.toLowerCase();
+
+  // 1. Regular mass recruiters & IT services
+  for (const reg of REGULAR_COMPANIES) {
+    if (n.includes(reg)) return "Regular";
+  }
+
+  // 2. Super Dream tier-1 tech & quant finance
+  for (const sd of SUPER_DREAM_COMPANIES) {
+    if (n.includes(sd)) return "Super Dream";
+  }
+
+  // 3. Dream enterprise leaders & top GCCs
+  for (const d of DREAM_COMPANIES) {
+    if (n.includes(d)) return "Dream";
+  }
+
+  // 4. Sector-based heuristics
+  if (c.includes("it services") || (c.includes("consulting") && !c.includes("management"))) {
+    return "Regular";
+  }
+  if (
+    c.includes("enterprise") ||
+    c.includes("investment bank") ||
+    c.includes("global bank") ||
+    c.includes("fintech / digital payments")
+  ) {
+    return "Dream";
+  }
+
+  // 5. Default to Standard for funded startups, specialized SaaS, edtech, mid-market
+  return "Standard";
+}
+
+/**
+ * Checks if a company's placement category matches a selected filter.
+ * Handles case, hyphens, and whitespace differences (e.g. "super-dream" matches "Super Dream").
+ */
+export function matchCategory(companyType: string, filter: string): boolean {
+  if (!filter || filter.trim().toLowerCase() === "all") return true;
+  const normFilter = normalizePlacementCategory(filter);
+  const normComp = normalizePlacementCategory(companyType);
+  if (normFilter && normComp) {
+    return normFilter === normComp;
+  }
+  return companyType.trim().toLowerCase() === filter.trim().toLowerCase();
+}
+
 // ---- Normalizers ----
 
 export function normalizeCompanySummary(
   company_id: number,
   short_json: Record<string, unknown>
 ): CompanySummary {
+  const name = asString(short_json.name) || `Company ${company_id}`;
+  const shortName = asString(short_json.short_name) || name;
+  const category = asString(short_json.category);
+
+  // Check explicit placement category properties first
+  const rawType =
+    short_json.company_type ??
+    short_json.placement_category ??
+    short_json.tier ??
+    short_json.placement_tier;
+
+  const normalizedExplicit = normalizePlacementCategory(rawType);
+  const company_type =
+    normalizedExplicit ?? classifyPlacementCategory(name, category, shortName);
+
   return {
     company_id,
-    name: asString(short_json.name),
-    short_name: asString(short_json.short_name),
+    name,
+    short_name: shortName,
     logo_url: asString(short_json.logo_url),
-    category: asString(short_json.category),
-    company_type: asString(short_json.company_type),
+    category,
+    company_type,
     incorporation_year: short_json.incorporation_year
       ? Number(short_json.incorporation_year)
       : null,

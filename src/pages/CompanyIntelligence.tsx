@@ -1,7 +1,7 @@
 // src/pages/CompanyIntelligence.tsx
 import { useEffect, useRef, useState, memo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ExternalLink, Star, RefreshCcw } from "lucide-react";
+import { ExternalLink, Star, RefreshCcw, Building2 } from "lucide-react";
 import { useCompany } from "@/contexts/CompanyContext";
 import { useCompanyProfile } from "@/lib/companyApi";
 import { buildIntelligenceSections } from "@/data/intelligenceData";
@@ -395,11 +395,30 @@ export default function CompanyIntelligence() {
       )}
 
       {/* ── Intelligence sections ── */}
-      {!isLoading && !isError && (
+      {!isLoading && !isError && profile && (
         <div className="flex-1 px-4 py-6 max-w-5xl w-full mx-auto space-y-4">
           {sections.map((section) => (
             <SectionCard key={section.id} section={section} />
           ))}
+        </div>
+      )}
+
+      {/* ── No profile found ── */}
+      {!isLoading && !isError && !profile && (
+        <div className="flex-1 flex flex-col items-center justify-center py-16 px-4 text-center">
+          <Building2 className="w-10 h-10 text-muted-foreground/40 mb-3" />
+          <h3 className="font-heading font-semibold text-lg text-foreground mb-1">
+            No intelligence data found
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Detailed profile information is not available for this company.
+          </p>
+          <button
+            onClick={() => navigate("/")}
+            className="inline-flex items-center gap-2 rounded-md bg-[#2563EB] text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            Back to Companies
+          </button>
         </div>
       )}
     </div>

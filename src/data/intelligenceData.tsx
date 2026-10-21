@@ -39,7 +39,7 @@ export interface IntelligenceSection {
 }
 
 export function buildIntelligenceSections(
-  profile?: CompanyProfile
+  profile?: CompanyProfile | null
 ): IntelligenceSection[] {
   const p = profile;
 

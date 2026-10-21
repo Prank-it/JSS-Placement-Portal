@@ -1,13 +1,15 @@
 // src/pages/Index.tsx
 import { useState, useMemo, useCallback } from "react";
-import { Search, X, Building2 } from "lucide-react";
+import { Search, X, Building2, ArrowUpDown } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { CompanyCard } from "@/components/shared/CompanyCard";
 import { useCompanies } from "@/lib/companyApi";
-import type { CompanySummary } from "@/lib/companyData";
+import { matchCategory, type CompanySummary } from "@/lib/companyData";
 
 const CATEGORY_FILTERS = ["All", "Super Dream", "Dream", "Standard", "Regular"] as const;
 type CategoryFilter = (typeof CATEGORY_FILTERS)[number];
+
+type SortOption = "default" | "name-asc" | "name-desc" | "growth-desc";
 
 const CATEGORY_STYLES: Record<
   string,
@@ -62,6 +64,7 @@ function SkeletonCard() {
 export default function Index() {
   const [searchRaw, setSearchRaw] = useState("");
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>("All");
+  const [sortBy, setSortBy] = useState<SortOption>("default");
 
   const search = useDebounce(searchRaw, 200);
 
@@ -70,11 +73,13 @@ export default function Index() {
 
   const filtered = useMemo(() => {
     let result: CompanySummary[] = allCompanies;
+
+    // Category filter using robust normalization/matching
     if (activeFilter !== "All") {
-      result = result.filter(
-        (c) => c.company_type.toLowerCase() === activeFilter.toLowerCase()
-      );
+      result = result.filter((c) => matchCategory(c.company_type, activeFilter));
     }
+
+    // Search filter across name, short_name, headquarters, category, and company_type
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
@@ -82,18 +87,31 @@ export default function Index() {
           c.name.toLowerCase().includes(q) ||
           c.short_name.toLowerCase().includes(q) ||
           c.headquarters_address.toLowerCase().includes(q) ||
-          c.category.toLowerCase().includes(q)
+          c.category.toLowerCase().includes(q) ||
+          c.company_type.toLowerCase().includes(q)
       );
     }
+
+    // Sorting
+    if (sortBy === "name-asc") {
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === "name-desc") {
+      result = [...result].sort((a, b) => b.name.localeCompare(a.name));
+    } else if (sortBy === "growth-desc") {
+      result = [...result].sort((a, b) => {
+        const gA = parseFloat(a.yoy_growth_rate.replace(/[^0-9.-]/g, "")) || 0;
+        const gB = parseFloat(b.yoy_growth_rate.replace(/[^0-9.-]/g, "")) || 0;
+        return gB - gA;
+      });
+    }
+
     return result;
-  }, [allCompanies, search, activeFilter]);
+  }, [allCompanies, search, activeFilter, sortBy]);
 
   const counts = useMemo(() => {
     const map: Record<string, number> = { All: allCompanies.length };
     for (const cat of ["Super Dream", "Dream", "Standard", "Regular"]) {
-      map[cat] = allCompanies.filter(
-        (c) => c.company_type.toLowerCase() === cat.toLowerCase()
-      ).length;
+      map[cat] = allCompanies.filter((c) => matchCategory(c.company_type, cat)).length;
     }
     return map;
   }, [allCompanies]);
@@ -101,7 +119,10 @@ export default function Index() {
   const handleReset = useCallback(() => {
     setSearchRaw("");
     setActiveFilter("All");
+    setSortBy("default");
   }, []);
+
+  const hasActiveFilters = activeFilter !== "All" || searchRaw.trim().length > 0 || sortBy !== "default";
 
   return (
     <div className="min-h-screen bg-[#FFFFFF]">
@@ -151,33 +172,103 @@ export default function Index() {
 
       {/* Filters */}
       <div className="bg-white border-b border-border px-4 sm:px-6 lg:px-8 py-3">
-        <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
-          {CATEGORY_FILTERS.map((cat) => {
-            const style = CATEGORY_STYLES[cat];
-            const isActive = activeFilter === cat;
-            return (
-              <button
-                key={cat}
-                onClick={() => setActiveFilter(cat)}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold flex-shrink-0 transition-colors ${
-                  isActive ? style.active : style.inactive
-                }`}
-              >
-                {cat !== "All" && (
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      isActive ? "bg-white" : style.dot
-                    }`}
-                  />
-                )}
-                {cat}
-                <span className={`ml-0.5 ${isActive ? "opacity-80" : "opacity-60"}`}>
-                  ({counts[cat] ?? 0})
-                </span>
-              </button>
-            );
-          })}
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          {/* Category pills */}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 sm:pb-0">
+            {CATEGORY_FILTERS.map((cat) => {
+              const style = CATEGORY_STYLES[cat];
+              const isActive = activeFilter === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setActiveFilter(cat)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold flex-shrink-0 transition-colors ${
+                    isActive ? style.active : style.inactive
+                  }`}
+                >
+                  {cat !== "All" && (
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        isActive ? "bg-white" : style.dot
+                      }`}
+                    />
+                  )}
+                  {cat}
+                  <span className={`ml-0.5 ${isActive ? "opacity-80" : "opacity-60"}`}>
+                    ({counts[cat] ?? 0})
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Sort selector */}
+          <div className="flex items-center gap-2 flex-shrink-0 self-start sm:self-auto">
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <ArrowUpDown className="w-3.5 h-3.5" />
+              Sort:
+            </span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="text-xs border border-border rounded-md px-2.5 py-1 bg-white text-[#334155] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+            >
+              <option value="default">Default Order</option>
+              <option value="name-asc">Name (A–Z)</option>
+              <option value="name-desc">Name (Z–A)</option>
+              <option value="growth-desc">YoY Growth (High to Low)</option>
+            </select>
+          </div>
         </div>
+
+        {/* Active filter badges */}
+        {hasActiveFilters && (
+          <div className="max-w-7xl mx-auto pt-2.5 mt-2.5 border-t border-border/60 flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
+            <span>Filtered by:</span>
+            {activeFilter !== "All" && (
+              <span className="inline-flex items-center gap-1 bg-secondary text-foreground px-2 py-0.5 rounded-full text-xs">
+                Category: <strong>{activeFilter}</strong>
+                <button
+                  onClick={() => setActiveFilter("All")}
+                  className="hover:text-red-600 transition-colors ml-0.5"
+                  title="Remove category filter"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            {searchRaw.trim() && (
+              <span className="inline-flex items-center gap-1 bg-secondary text-foreground px-2 py-0.5 rounded-full text-xs">
+                Search: <strong>&ldquo;{searchRaw}&rdquo;</strong>
+                <button
+                  onClick={() => setSearchRaw("")}
+                  className="hover:text-red-600 transition-colors ml-0.5"
+                  title="Remove search query"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            {sortBy !== "default" && (
+              <span className="inline-flex items-center gap-1 bg-secondary text-foreground px-2 py-0.5 rounded-full text-xs">
+                Sorted: <strong>{sortBy === "name-asc" ? "A–Z" : sortBy === "name-desc" ? "Z–A" : "YoY Growth"}</strong>
+                <button
+                  onClick={() => setSortBy("default")}
+                  className="hover:text-red-600 transition-colors ml-0.5"
+                  title="Reset sort"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            <button
+              onClick={handleReset}
+              className="text-[#2563EB] hover:underline ml-auto font-medium"
+            >
+              Reset all
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Grid */}
